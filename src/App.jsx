@@ -1,7 +1,19 @@
+import { Route, Routes } from "react-router-dom";
 import "./App.css";
+import Home from "./Components/Home";
+import WatchList from "./Components/WatchList";
+import Navbar from "./Components/Navbar";
 
 function App() {
-  return <h1 className="text-3xl font-bold underline">Hello world!</h1>;
+  return (
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/watchlist" element={<WatchList />} />
+      </Routes>
+    </>
+  );
 }
 
 export default App;
