@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MovieCard from "./MovieCard";
 import Pagination from "./Pagination";
+import axios from "axios";
 
 const Movies = () => {
   const [movies, setMovies] = useState([
@@ -48,6 +49,8 @@ const Movies = () => {
 
   const [pageNo, setPageNo] = useState(1);
 
+  const [watchlist, setWatchlist] = useState([]);
+
   const handleNext = () => {
     setPageNo(pageNo + 1);
   };
@@ -57,6 +60,29 @@ const Movies = () => {
       setPageNo(pageNo - 1);
     }
   };
+
+  const addToWatchList = (movieObj) => {
+    let updatedWatchList = [...watchlist, movieObj]
+    setWatchlist(updatedWatchList);
+  }
+
+  const removeFromWatchList = (movieObj) => {
+    let filteredMovies = watchlist.filter((movie) => {
+      return movie.id !== movieObj.id;
+    })
+    setWatchlist(filteredMovies);
+  }
+
+  useEffect(() => {
+    axios
+      .get(
+        `https://api.themoviedb.org/3/trending/movie/day?api_key=3aec63790d50f3b9fc2efb4c15a8cf99&language=en-US&page=${pageNo}`
+      )
+      .then(function (res) {
+        console.log(res.data.results);
+        setMovies(res.data.results);
+      });
+  }, [pageNo]);
 
   return (
     <div className="min-h-screen">
@@ -70,7 +96,11 @@ const Movies = () => {
       </div>
 
       {/* Pagination */}
-      <Pagination nextPageFn={handleNext} previousPageFn={handlePrev} pageNumber={pageNo} />
+      <Pagination
+        nextPageFn={handleNext}
+        previousPageFn={handlePrev}
+        pageNumber={pageNo}
+      />
     </div>
   );
 };
