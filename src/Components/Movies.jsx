@@ -1,76 +1,50 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import MovieCard from "./MovieCard";
 import Pagination from "./Pagination";
-import axios from "axios";
 import { MovieContext } from "./MovieContext";
+import { useDispatch, useSelector } from "react-redux";
+import PaginationSlice from "./Redux/paginationSlice";
+import fetchMiddleware from "./Redux/movieMiddleware";
+
+const paginationActions = PaginationSlice.actions;
 
 const Movies = () => {
-  const [movies, setMovies] = useState([
-    {
-      url: "https://fastly.picsum.photos/id/10/2500/1667.jpg?hmac=J04WWC_ebchx3WwzbM-Z4_KC_LeLBWr5LZMaAkWkF68",
-      title: "Movie 1",
-    },
-    {
-      url: "https://fastly.picsum.photos/id/10/2500/1667.jpg?hmac=J04WWC_ebchx3WwzbM-Z4_KC_LeLBWr5LZMaAkWkF68",
-      title: "Movie 2",
-    },
-    {
-      url: "https://fastly.picsum.photos/id/10/2500/1667.jpg?hmac=J04WWC_ebchx3WwzbM-Z4_KC_LeLBWr5LZMaAkWkF68",
-      title: "Movie 3",
-    },
-    {
-      url: "https://fastly.picsum.photos/id/10/2500/1667.jpg?hmac=J04WWC_ebchx3WwzbM-Z4_KC_LeLBWr5LZMaAkWkF68",
-      title: "Movie 4",
-    },
-    {
-      url: "https://fastly.picsum.photos/id/10/2500/1667.jpg?hmac=J04WWC_ebchx3WwzbM-Z4_KC_LeLBWr5LZMaAkWkF68",
-      title: "Movie 5",
-    },
-    {
-      url: "https://fastly.picsum.photos/id/10/2500/1667.jpg?hmac=J04WWC_ebchx3WwzbM-Z4_KC_LeLBWr5LZMaAkWkF68",
-      title: "Movie 6",
-    },
-    {
-      url: "https://fastly.picsum.photos/id/10/2500/1667.jpg?hmac=J04WWC_ebchx3WwzbM-Z4_KC_LeLBWr5LZMaAkWkF68",
-      title: "Movie 7",
-    },
-    {
-      url: "https://fastly.picsum.photos/id/10/2500/1667.jpg?hmac=J04WWC_ebchx3WwzbM-Z4_KC_LeLBWr5LZMaAkWkF68",
-      title: "Movie 8",
-    },
-    {
-      url: "https://fastly.picsum.photos/id/10/2500/1667.jpg?hmac=J04WWC_ebchx3WwzbM-Z4_KC_LeLBWr5LZMaAkWkF68",
-      title: "Movie 9",
-    },
-    {
-      url: "https://fastly.picsum.photos/id/10/2500/1667.jpg?hmac=J04WWC_ebchx3WwzbM-Z4_KC_LeLBWr5LZMaAkWkF68",
-      title: "Movie 10",
-    },
-  ]);
+  const { movies, error, loading } = useSelector((state) => state.MovieSlice);
+  const { watchList, addToWatchList, removeFromWatchList } =
+    useContext(MovieContext);
+  const { pageNo } = useSelector((state) => state.PaginationSlice);
 
-  const {watchList, addToWatchList, removeFromWatchList} = useContext(MovieContext);
-  const [pageNo, setPageNo] = useState(1);
+  const dispatch = useDispatch();
 
   const handleNext = () => {
-    setPageNo(pageNo + 1);
+    dispatch(paginationActions.handleNext());
   };
 
   const handlePrev = () => {
-    if (pageNo > 1) {
-      setPageNo(pageNo - 1);
-    }
+    dispatch(paginationActions.handlePrevious());
   };
 
   useEffect(() => {
-    axios
-      .get(
-        `https://api.themoviedb.org/3/trending/movie/day?api_key=3aec63790d50f3b9fc2efb4c15a8cf99&language=en-US&page=${pageNo}`
-      )
-      .then(function (res) {
-        console.log(res.data.results);
-        setMovies(res.data.results);
-      });
+    dispatch(fetchMiddleware(pageNo));
   }, [pageNo]);
+
+  if (loading) {
+    return (
+      <div>
+        <div className="text-4xl font-bold text-center m-5">Loading...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div>
+        <div className="text-4xl font-bold text-center m-5">
+          Something went wrong!
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -79,7 +53,15 @@ const Movies = () => {
       {/* Movies */}
       <div className="flex justify-evenly gap-8 flex-wrap">
         {movies.map((movie, i) => {
-          return <MovieCard key={i} movieObj={movie} addToWatchList={addToWatchList} removeFromWatchList={removeFromWatchList} watchlist={watchList} />;
+          return (
+            <MovieCard
+              key={i}
+              movieObj={movie}
+              addToWatchList={addToWatchList}
+              removeFromWatchList={removeFromWatchList}
+              watchlist={watchList}
+            />
+          );
         })}
       </div>
 
