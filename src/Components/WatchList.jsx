@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import genreids from "../assets/genre";
+import { MovieContext } from "./MovieContext";
 
 const WatchList = () => {
-  const [watchlist, setWatchlist] = useState([]);
+  const {watchList, setWatchList} = useContext(MovieContext);
   const [search, setSearch] = useState("");
   const [genreList, setGenreList] = useState([]);
   const [currGenre, setCurrGenre] = useState("All");
@@ -16,17 +17,17 @@ const WatchList = () => {
   }
 
   const handleAscendingRatings = () => {
-    let sortedAscending = watchlist.sort((a, b) => {
+    let sortedAscending = watchList.sort((a, b) => {
       return a.vote_average - b.vote_average;
     });
-    setWatchlist([...sortedAscending]);
+    setWatchList([...sortedAscending]);
   };
 
   const handleDescendingRatings = () => {
-    let sortedDescending = watchlist.sort((a, b) => {
+    let sortedDescending = watchList.sort((a, b) => {
       return b.vote_average - a.vote_average;
     });
-    setWatchlist([...sortedDescending]);
+    setWatchList([...sortedDescending]);
   };
 
   useEffect(() => {
@@ -38,13 +39,13 @@ const WatchList = () => {
 
     const parsedWatchList = JSON.parse(moviesFromLocalStorage);
 
-    setWatchlist(parsedWatchList);
+    setWatchList(parsedWatchList);
     console.log(parsedWatchList);
   }, []);
 
   useEffect(() => {
-    console.log(watchlist);
-    let genres = watchlist.map((movie) => {
+    console.log(watchList);
+    let genres = watchList.map((movie) => {
       return genreids[movie.genre_ids[0]];
     });
 
@@ -52,7 +53,7 @@ const WatchList = () => {
     genres = new Set(genres);
     setGenreList(["All",...genres]);
     console.log(genres);
-  }, [watchlist]);
+  }, [watchList]);
 
   return (
     <div className="overflow-hidden rounded-lg border border-gray-200 shadow-md m-5">
@@ -117,7 +118,7 @@ const WatchList = () => {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100 border-t border-gray-100">
-          {watchlist
+          {watchList
             .filter((movie) => {
               if (currGenre === "All") {
                 return true;

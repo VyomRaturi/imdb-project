@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import MovieCard from "./MovieCard";
 import Pagination from "./Pagination";
 import axios from "axios";
+import { MovieContext } from "./MovieContext";
 
 const Movies = () => {
   const [movies, setMovies] = useState([
@@ -47,9 +48,8 @@ const Movies = () => {
     },
   ]);
 
+  const {watchList, addToWatchList, removeFromWatchList} = useContext(MovieContext);
   const [pageNo, setPageNo] = useState(1);
-
-  const [watchlist, setWatchlist] = useState([]);
 
   const handleNext = () => {
     setPageNo(pageNo + 1);
@@ -60,20 +60,6 @@ const Movies = () => {
       setPageNo(pageNo - 1);
     }
   };
-
-  const addToWatchList = (movieObj) => {
-    let updatedWatchList = [...watchlist, movieObj]
-    setWatchlist(updatedWatchList);
-    localStorage.setItem("watchList", JSON.stringify(updatedWatchList));
-  }
-
-  const removeFromWatchList = (movieObj) => {
-    let filteredMovies = watchlist.filter((movie) => {
-      return movie.id !== movieObj.id;
-    })
-    setWatchlist(filteredMovies);
-    localStorage.setItem("movies", JSON.stringify(filteredMovies));
-  }
 
   useEffect(() => {
     axios
@@ -86,17 +72,6 @@ const Movies = () => {
       });
   }, [pageNo]);
 
-  useEffect(() => {
-    let moviesFromLocalStorage = localStorage.getItem("watchList");
-
-    if (!moviesFromLocalStorage) {
-      return;
-    }
-
-    setWatchlist(JSON.parse(moviesFromLocalStorage));
-    console.log(JSON.parse(moviesFromLocalStorage)); 
-  }, []);
-
   return (
     <div className="min-h-screen">
       <div className="text-4xl font-bold text-center m-5">Trending Movies</div>
@@ -104,7 +79,7 @@ const Movies = () => {
       {/* Movies */}
       <div className="flex justify-evenly gap-8 flex-wrap">
         {movies.map((movie, i) => {
-          return <MovieCard key={i} movieObj={movie} addToWatchList={addToWatchList} removeFromWatchList={removeFromWatchList} watchlist={watchlist} />;
+          return <MovieCard key={i} movieObj={movie} addToWatchList={addToWatchList} removeFromWatchList={removeFromWatchList} watchlist={watchList} />;
         })}
       </div>
 
